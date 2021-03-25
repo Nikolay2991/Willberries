@@ -14,7 +14,6 @@ const mySwiper = new Swiper('.swiper-container', {
 
 const buttonCart = document.querySelector('.button-cart');
 const modalCart = document.querySelector('#modal-cart');
-const modalClose = document.querySelector('.modal-close');
 
 
 const openModal = function() {
@@ -27,13 +26,22 @@ const closeModal = function() {
 
 
 buttonCart.addEventListener('click', openModal);
-modalClose.addEventListener('click', closeModal);
 
+// Закрытие модального окна при нажатии на оверлей и на крестик
+
+modalCart.addEventListener('click', function(event) {
+	const target = event.target;
+	// Если клик мышки на overlay или modal-close (крестик) то закрываем модалку closeModal()
+	if (target.classList.contains('overlay') || target.classList.contains('modal-close')) {
+		closeModal();
+	};
+
+});
 
 // scroll smooth
 
 (function(){
-	const scrollLinks = document.querySelectorAll('a.scroll-link');
+	const scrollLinks = document.querySelectorAll('a.scroll-link, a.view-all');
 
 	for (const scrollLink of scrollLinks) {
 		scrollLink.addEventListener('click', function(event) {
@@ -50,9 +58,13 @@ modalClose.addEventListener('click', closeModal);
 
 // goods
 
-const more = document.querySelector('.more');
+const viewAll = document.querySelectorAll('.view-all');
+// const navigationLink = document.querySelectorAll('.navigation-link:not(.view-all)');
 const navigationLink = document.querySelectorAll('.navigation-link');
 const longGoodsList = document.querySelector('.long-goods-list');
+const showClothing = document.querySelectorAll('.show-clothing');
+const showAcsessories = document.querySelectorAll('.show-acsessories');
+
 
 const getGoods = async function () {
 	const result = await fetch('db/db.json');
@@ -95,10 +107,15 @@ const renderCards = function(data) {
 	document.body.classList.add('show-goods')
 };
 
-more.addEventListener('click', function(event){
+const showAll = function(event) {
 	event.preventDefault();
 	getGoods().then(renderCards);
+}
+
+viewAll.forEach(function(elem){
+	elem.addEventListener('click', showAll);
 });
+
 
 const filterCards = function(field, value) {
 	getGoods()
@@ -114,11 +131,23 @@ const filterCards = function(field, value) {
 navigationLink.forEach(function (link) {
 	link.addEventListener('click', function(event) {
 		event.preventDefault();
-		console.log(link);
 		const field = link.dataset.field;
 		const value = link.textContent;
-		console.log(field);
-		console.log(value);
+		if (!field) return;
 		filterCards(field, value);
-	})
+	});
+});
+
+showClothing.forEach(item => {
+	item.addEventListener('click', event => {
+		event.preventDefault();
+		filterCards('category', 'Accessories')
+	});
+});
+
+showAcsessories.forEach(item => {
+	item.addEventListener('click', event => {
+		event.preventDefault();
+		filterCards('category', 'Clothing');
+	});
 });
